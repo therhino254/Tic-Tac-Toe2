@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe Neon</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0d0221;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+      background: linear-gradient(to right, #00f0ff, #ff00ff, #f0ff00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background: #ff00cc;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      margin-top: 30px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.5em;
+      border: 2px solid #ccc;
+      border-radius: 15px;
+      background: #1f1b2e;
+      color: #00ffe5;
+      box-shadow: 0 0 10px #00ffe5;
+    }
+
+    .cell.x { color: #00aaff; text-shadow: 0 0 10px #00aaff; }
+    .cell.o { color: #ff0044; text-shadow: 0 0 10px #ff0044; }
+
+    .winner-line {
+      position: absolute;
+      height: 5px;
+      background: yellow;
+      transform-origin: left;
+      transform: rotate(0deg);
+    }
+  </style>
+</head>
+<body>
+  <div class="screen active" id="startScreen">
+    <h1>Tic Tac Toe</h1>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+
+  <div class="screen" id="gameScreen">
+    <h1 id="status">X's Turn</h1>
+    <div class="board" id="board"></div>
+  </div>
+
+  <script>
+    const startScreen = document.getElementById('startScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const board = document.getElementById('board');
+    const statusText = document.getElementById('status');
+
+    let currentPlayer = 'x';
+    let gameState = ['', '', '', '', '', '', '', '', ''];
+    let gameActive = true;
+
+    const winningCombos = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+
+    function startGame() {
+      startScreen.classList.remove('active');
+      gameScreen.classList.add('active');
+      initializeBoard();
+    }
+
+    function initializeBoard() {
+      board.innerHTML = '';
+      gameState = ['', '', '', '', '', '', '', '', ''];
+      currentPlayer = 'x';
+      gameActive = true;
+      statusText.textContent = "X's Turn";
+
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.index = i;
+        cell.addEventListener('click', handleCellClick);
+        board.appendChild(cell);
+      }
+    }
+
+    function handleCellClick(e) {
+      const index = e.target.dataset.index;
+
+      if (gameState[index] !== '' || !gameActive) return;
+
+      gameState[index] = currentPlayer;
+      e.target.classList.add(currentPlayer);
+      e.target.textContent = currentPlayer.toUpperCase();
+
+      if (checkWin()) {
+        statusText.textContent = `${currentPlayer.toUpperCase()} Wins!`;
+        gameActive = false;
+        return;
+      }
+
+      if (!gameState.includes('')) {
+        statusText.textContent = "It's a Draw!";
+        gameActive = false;
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'x' ? 'o' : 'x';
+      statusText.textContent = `${currentPlayer.toUpperCase()}'s Turn`;
+    }
+
+    function checkWin() {
+      return winningCombos.some(combo => {
+        const [a, b, c] = combo;
+        return gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c];
+      });
+    }
+  </script>
+</body>
+</html>
