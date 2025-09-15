@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculator with Coins</title>
+  <title>Modern Calculator</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -12,7 +12,7 @@
       align-items: center;
       min-height: 100vh;
       background: linear-gradient(135deg, #6a11cb, #2575fc);
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
     }
     .calculator {
@@ -21,25 +21,23 @@
       border-radius: 20px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.4);
       width: 320px;
-      text-align: center;
     }
     .display {
       background: #121224;
       color: #00ffcc;
-      font-size: 2rem;
+      font-size: 2.2rem;
       text-align: right;
       padding: 15px;
       border-radius: 15px;
-      margin-bottom: 10px;
-      min-height: 60px;
+      margin-bottom: 20px;
       word-wrap: break-word;
+      min-height: 60px;
     }
-    .coin-balance {
-      color: #ffd700;
-      font-size: 1rem;
-      margin-bottom: 15px;
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
     }
-    .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     button {
       padding: 18px;
       font-size: 1.2rem;
@@ -51,17 +49,21 @@
       transition: 0.2s all ease;
       user-select: none;
     }
-    button:hover { background: #4b4b6a; transform: scale(1.05); }
+    button:hover {
+      background: #4b4b6a;
+      transform: scale(1.05);
+    }
     .operator { background: #ff9500; }
     .operator:hover { background: #e68a00; }
-    .equals { background: #28a745; grid-column: span 2; }
+    .equals {
+      background: #28a745;
+      grid-column: span 2;
+    }
     .equals:hover { background: #218838; }
     .clear { background: #dc3545; }
     .clear:hover { background: #c82333; }
-    .reward-btn {
-      background: #007bff; grid-column: span 4;
-    }
-    .reward-btn:hover { background: #0056b3; }
+    .reward { background: #17a2b8; grid-column: span 2; }
+    .reward:hover { background: #138496; }
     @media (max-width: 400px) {
       .calculator { width: 90%; }
       .display { font-size: 1.8rem; }
@@ -72,13 +74,8 @@
 <body>
   <div class="calculator">
     <div class="display" id="display">0</div>
-    <div class="coin-balance" id="coins">Coins: 0</div>
-
-    <!-- Initial Rewarded Ad Button -->
-    <button class="reward-btn" onclick="showInitialReward()">Watch Ad to Unlock Calculator</button>
-
     <div class="buttons">
-      <button class="clear" onclick="appendValue('C')">C</button>
+      <button class="clear" onclick="clearDisplay()">C</button>
       <button onclick="appendValue('/')">÷</button>
       <button onclick="appendValue('*')">×</button>
       <button onclick="appendValue('-')">−</button>
@@ -96,77 +93,47 @@
       <button onclick="appendValue('1')">1</button>
       <button onclick="appendValue('2')">2</button>
       <button onclick="appendValue('3')">3</button>
-      <button class="equals" onclick="appendValue('=')">=</button>
+      <button class="equals" onclick="calculate()">=</button>
 
       <button onclick="appendValue('0')" style="grid-column: span 2;">0</button>
+      <button class="reward" onclick="showRewardedAd()">💰 Watch Ad</button>
     </div>
   </div>
 
-  <!-- Monetag Script -->
-  <script src="https://cdn.monetag.com/monetag.js"></script>
-
   <script>
     const display = document.getElementById('display');
-    const coinsDisplay = document.getElementById('coins');
-    let bonusUnlocked = false;
-    let operationCount = 0;
-    const operationsPerAd = 4; // trigger ad every 4 operations
-    let coins = 0;
 
-    // Initial unlock
-    function showInitialReward() {
-      show_9876645('pop').then(() => {
-        alert("🎉 Calculator unlocked!");
-        bonusUnlocked = true;
-      }).catch(e => {
-        alert("Ad closed or error occurred. Watch again to unlock.");
-      });
-    }
-
-    // Append value or operator
     function appendValue(value) {
-      if (!bonusUnlocked) return alert("Please watch ad to unlock calculator features!");
-
-      if (value === 'C') {
-        display.innerText = '0';
-        trackOperation();
-        return;
-      }
-
-      if (value === '=') {
-        try { display.innerText = eval(display.innerText); }
-        catch { display.innerText = 'Error'; }
-        trackOperation();
-        return;
-      }
-
-      if (display.innerText === '0') display.innerText = value;
-      else display.innerText += value;
-
-      trackOperation();
-    }
-
-    // Track operation and reward coins
-    function trackOperation() {
-      operationCount++;
-      if (operationCount >= operationsPerAd) {
-        operationCount = 0;
-        triggerReward();
+      if (display.innerText === '0') {
+        display.innerText = value;
+      } else {
+        display.innerText += value;
       }
     }
 
-    // Reward coins via Monetag
-    function triggerReward() {
+    function clearDisplay() {
+      display.innerText = '0';
+    }
+
+    function calculate() {
+      try {
+        display.innerText = eval(display.innerText);
+      } catch {
+        display.innerText = 'Error';
+      }
+    }
+
+    // Rewarded Popup Ad
+    function showRewardedAd() {
       show_9876645('pop').then(() => {
-        const rewardAmount = 5; // coins per ad
-        coins += rewardAmount;
-        coinsDisplay.innerText = `Coins: ${coins}`;
-        console.log(`User earned ${rewardAmount} coins`);
-        // Optional: send API to Telegram bot backend to save coins
+          alert("✅ Thanks for watching! You earned a reward.");
       }).catch(e => {
-        console.log("Reward ad skipped or error, continue using calculator.");
+          console.log("Ad error:", e);
+          alert("⚠️ Ad failed to load. Please try again later.");
       });
     }
   </script>
+
+  <script src='//libtl.com/sdk.js' data-zone='9876645' data-sdk='show_9876645'></script>
 </body>
 </html>
